@@ -1,4 +1,4 @@
-package com.xong;
+package com.xong.DB;
 
 public class DBConfig {
 

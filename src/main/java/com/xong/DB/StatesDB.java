@@ -1,15 +1,15 @@
-package com.xong;
+package com.xong.DB;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-public class StateDB {
+public class StatesDB {
 
     private static String tableName = "states";
     private static String stateColumn = "state";
     private static String statusColumn = "status";
 
-    public StateDB() {
+    public StatesDB() {
         try {
 
             String Driver = "org.sqlite.JDBC";
@@ -40,6 +40,9 @@ public class StateDB {
                 }
             }
 
+            ps.close();
+            connection.close();
+
         } catch (SQLException se) {
             se.printStackTrace();
             System.exit(-1);
@@ -62,6 +65,9 @@ public class StateDB {
             ps.setInt(2, 2);
 
             updated = ps.executeUpdate();
+
+            ps.close();
+            connection.close();
 
         } catch (SQLException se) {
             se.printStackTrace();
@@ -88,11 +94,42 @@ public class StateDB {
 
             updated = i > 0;
 
+            ps.close();
+            connection.close();
+
         } catch (SQLException se) {
             se.printStackTrace();
             System.exit(-1);
         }
 
         return updated;
+    }
+
+    public static int getScore() {
+
+        int numOfCorrectStates = 0;
+
+        try(Connection connection = DriverManager.getConnection(DBConfig.db_url)) {
+
+            String getCorrectStates = "SELECT count(*)" + " FROM " + tableName + " WHERE " + statusColumn + " = ?";
+            PreparedStatement ps = connection.prepareStatement(getCorrectStates);
+
+            ps.setInt(1, 2);
+
+            ResultSet resultSet = ps.executeQuery();
+
+            resultSet.next();
+
+            numOfCorrectStates = resultSet.getInt(1);
+
+            ps.close();
+            connection.close();
+
+        } catch (SQLException se) {
+            se.printStackTrace();
+            System.exit(-1);
+        }
+
+        return numOfCorrectStates;
     }
 }

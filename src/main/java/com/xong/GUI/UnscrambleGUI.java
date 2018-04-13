@@ -1,4 +1,6 @@
-package com.xong;
+package com.xong.GUI;
+
+import com.xong.DB.StatesDB;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,17 +18,24 @@ public class UnscrambleGUI extends JFrame {
     private JButton skipButton;
     private JButton startOverButton;
     private JButton nextButton;
+    private JLabel scoreLabel;
 
     public UnscrambleGUI() {
         setContentPane(mainPanel);
         pack();
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
 
         setSize(1000, 400);
         setTitle("Unscramble the State");
 
+        scoreLabel.setText(getNumOfCorrectStates());
+
         configEventHandlers();
+    }
+
+    private String getNumOfCorrectStates() {
+        return "Score: " + Integer.toString(StatesDB.getScore()) + "/50";
     }
 
     private void configEventHandlers() {
@@ -40,8 +49,8 @@ public class UnscrambleGUI extends JFrame {
                 int response = JOptionPane.showConfirmDialog(UnscrambleGUI.this, "Are you sure you want to quit?", "Warning", JOptionPane.YES_NO_OPTION);
 
                 if(response == JOptionPane.YES_OPTION) {
-                    int updated = StateDB.startOver();
 
+                    int updated = StatesDB.startOver();
 
                     if (updated == 0) {
                         System.out.println("All the rows' statuses are 1; therefore, no changes");
@@ -62,30 +71,34 @@ public class UnscrambleGUI extends JFrame {
 
                 String userText = userUnscrambleTextField.getText();
 
-                boolean inList = false;
+                if(!userText.isEmpty()) {
+                    boolean inList = false;
 
-                for(String state : StateDB.getStatesList()) {
-                    if (userText.equals(state)) {
-                        inList = true;
-                        break;
+                    for(String state : StatesDB.getStatesList()) {
+                        if (userText.equals(state)) {
+                            inList = true;
+                            break;
+                        }
                     }
-                }
 
-                if(inList) {
-                    displayResultsLabel.setText("That is correct! Click \"Next\" for the next state.");
-                    boolean updated = StateDB.changeStateStatus(userText);
+                    if(inList) {
+                        displayResultsLabel.setText("That is correct! Click \"Next\" for the next state.");
+                        boolean updated = StatesDB.changeStateStatus(userText);
 
-                    if(updated) {
-                        System.out.println("Row status updated to 2 successfully");
+                        if(updated) {
+                            System.out.println("Row status updated to 2 successfully");
+                        } else {
+                            System.out.println("Row status failed to update to 2");
+                        }
+
                     } else {
-                        System.out.println("Row status failed to update to 2");
+                        displayResultsLabel.setText("Incorrect. Try again.");
                     }
-
                 } else {
-                    displayResultsLabel.setText("Incorrect. Try again.");
+                    JOptionPane.showMessageDialog(UnscrambleGUI.this, "Please enter your answer.");
                 }
 
-
+                scoreLabel.setText(getNumOfCorrectStates());
             }
         });
 
@@ -114,7 +127,7 @@ public class UnscrambleGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                int updated = StateDB.startOver();
+                int updated = StatesDB.startOver();
 
                 if (updated == 0) {
                     System.out.println("All the rows' statuses are 1; therefore, no changes");
@@ -125,6 +138,8 @@ public class UnscrambleGUI extends JFrame {
                 }
 
                 scrambleTheLettersOfTheState();
+
+                scoreLabel.setText(getNumOfCorrectStates());
             }
         });
 
@@ -132,7 +147,7 @@ public class UnscrambleGUI extends JFrame {
 
     private void scrambleTheLettersOfTheState() {
 
-        ArrayList<String> listOfStates = StateDB.getStatesList();
+        ArrayList<String> listOfStates = StatesDB.getStatesList();
 
         if(!listOfStates.isEmpty()) {
             Collections.shuffle(listOfStates);
